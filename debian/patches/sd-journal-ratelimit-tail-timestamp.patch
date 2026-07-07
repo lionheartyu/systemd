@@ -41,7 +41,7 @@ Signed-off-by: dongshengyuan <dongshengyuan@uniontech.com>
                  .last_direction = _DIRECTION_INVALID,
 +                .tail_timestamp_ratelimit = { .interval = USEC_PER_SEC, .burst = 1 },
          };
-
+ 
          if (fname) {
 --- a/src/libsystemd/sd-journal/journal-file.h
 +++ b/src/libsystemd/sd-journal/journal-file.h
@@ -52,21 +52,21 @@ Signed-off-by: dongshengyuan <dongshengyuan@uniontech.com>
 +#include "ratelimit.h"
  #include "sparse-endian.h"
  #include "time-util.h"
-
+ 
 @@ -130,6 +131,7 @@
          uint64_t newest_realtime_usec;
          unsigned newest_boot_id_prioq_idx;
          usec_t newest_mtime;
 +        RateLimit tail_timestamp_ratelimit; /* rate-limits journal_file_read_tail_timestamp() calls during iteration */
  } JournalFile;
-
+ 
  typedef enum JournalFileFlags {
 --- a/src/libsystemd/sd-journal/sd-journal.c
 +++ b/src/libsystemd/sd-journal/sd-journal.c
 @@ -807,7 +807,12 @@
          assert(j);
          assert(f);
-
+ 
 -        (void) journal_file_read_tail_timestamp(j, f);
 +        /* Rate-limit tail timestamp refreshes during iteration. Calling this unconditionally is
 +         * O(N x files) volatile mmap overhead that makes large 'journalctl -n N' queries unusably
@@ -74,5 +74,6 @@ Signed-off-by: dongshengyuan <dongshengyuan@uniontech.com>
 +         * for any missed inotify events. */
 +        if (ratelimit_below(&f->tail_timestamp_ratelimit))
 +                (void) journal_file_read_tail_timestamp(j, f);
-
+ 
          n_entries = le64toh(f->header->n_entries);
+ 

@@ -1,3 +1,10 @@
+systemd (255.2-4deepin40) unstable; urgency=medium
+
+  * coredumpctl: use break instead of continue for time bound checks
+  * https://github.com/systemd/systemd/issues/42808
+
+ -- dongshengyuan <dongshengyuan@uniontech.com>  Tue, 07 Jul 2026 10:30:00 +0800
+
 systemd (255.2-4deepin39) unstable; urgency=medium
 
   * sd-journal: rate-limit tail timestamp refresh during iteration

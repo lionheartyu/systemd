@@ -1,0 +1,48 @@
+From 7033143b553196c8790dacdb4380d043c49578a5 Mon Sep 17 00:00:00 2001
+From: dongshengyuan <545258830@qq.com>
+Date: Tue, 30 Jun 2026 18:10:49 +0800
+Subject: [PATCH] coredumpctl: use break instead of continue for time bound
+ checks
+
+When iterating journal entries with --until (forward scan) or --since
+(reverse scan), the code used continue instead of break after crossing
+the time boundary.
+
+Since sd_journal_seek_realtime_usec() is called before the loop to
+position at the start of the range, sd_journal_next()/previous()
+returns entries in monotonically increasing/decreasing time order.
+Once an entry's timestamp exceeds arg_until (or falls below arg_since
+in reverse), all subsequent entries will also be out of range.
+
+Using continue caused the entire remaining journal to be scanned
+unnecessarily. journalctl uses break for the identical pattern in
+src/journal/journalctl-show.c.
+
+Fixes: #42808
+Signed-off-by: dongshengyuan <dongshengyuan@uniontech.com>
+---
+ src/coredump/coredumpctl.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/coredump/coredumpctl.c b/src/coredump/coredumpctl.c
+index 9b26e23d62930..c13cfa1cce136 100644
+--- a/src/coredump/coredumpctl.c
++++ b/src/coredump/coredumpctl.c
+@@ -935,7 +935,7 @@ static int verb_dump_list(int argc, char *argv[], uintptr_t _data, void *userdat
+                                 if (r < 0)
+                                         return log_error_errno(r, "Failed to determine timestamp: %m");
+                                 if (usec > arg_until)
+-                                        continue;
++                                        break;
+                         }
+
+                         if (arg_since != USEC_INFINITY && arg_reverse) {
+@@ -945,7 +945,7 @@ static int verb_dump_list(int argc, char *argv[], uintptr_t _data, void *userdat
+                                 if (r < 0)
+                                         return log_error_errno(r, "Failed to determine timestamp: %m");
+                                 if (usec < arg_since)
+-                                        continue;
++                                        break;
+                         }
+
+                         r = print_entry(j, n_found++, t);
