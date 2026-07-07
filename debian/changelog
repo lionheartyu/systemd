@@ -1,3 +1,11 @@
+systemd (255.2-4deepin39) unstable; urgency=medium
+
+  * sd-journal: rate-limit tail timestamp refresh during iteration
+  * reduces journalctl -n 1000000 from 5:24 to 2:39 (-51%)
+  * https://github.com/systemd/systemd/issues/42521
+
+ -- dongshengyuan <dongshengyuan@uniontech.com>  Tue, 07 Jul 2026 10:00:00 +0800
+
 systemd (255.2-4deepin38) unstable; urgency=medium
 
   * add numa policy
