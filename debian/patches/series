@@ -400,3 +400,4 @@ fix-pe-binary-only-read-raw-data-of-section.patch
 fix-core-dont-abort-canceling-job-private-bus.patch
 fix-fd-util-identify-root-by-actual-root-mount.patch
 fix-dbus-workingdirectory-empty-string-assert.patch
+add-mn_CN-translation.patch

@@ -1,3 +1,9 @@
+systemd (255.2-4deepin86) unstable; urgency=medium
+
+  * Add mn_CN.
+
+ -- dongshengyuan <dongshengyuan@uniontech.com>  Wed, 04 Nov 2026 09:56:15 +0800
+
 systemd (255.2-4deepin85) unstable; urgency=medium
 
   * Backport upstream 6f8ef80bb3ba: core/dbus-execute: don't trigger
